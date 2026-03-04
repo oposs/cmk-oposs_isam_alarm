@@ -51,6 +51,10 @@ local/lib/python3/cmk_addons/plugins/oposs_isam_alarm/
 2. Set the **Collector URL** (e.g., `https://collector.example.com:8443/isam`)
 3. The agent builds the final URL as `{collector_url}/{host_ip}`
 
+## Related Projects
+
+- [isam-alarm-collector](https://github.com/oposs/isam-alarm-collector) — Perl/Mojolicious daemon that collects SNMP alarm data from Nokia/ALU 7360 ISAM GPON switches and serves it as JSON via HTTP. This plugin fetches its data from that collector.
+
 ## License
 
 MIT - OETIKER+PARTNER AG
