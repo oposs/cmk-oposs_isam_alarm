@@ -9,11 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### New
 
+### Changed
+
+### Fixed
+
+## 0.1.0 - 2026-03-04
+### New
 - Initial migration from oegig-plugins to Checkmk 2.3.x v2 API
 - Special agent fetches alarm data from collector web service via HTTP GET
 - Check plugin discovers and monitors per-service alarm states
 - MKP packaging via oposs/mkp-builder GitHub Action
 
-### Changed
 
-### Fixed
