@@ -57,4 +57,4 @@ local/lib/python3/cmk_addons/plugins/oposs_isam_alarm/
 
 ## License
 
-MIT - OETIKER+PARTNER AG
+GNU General Public License v2 - OETIKER+PARTNER AG. See [LICENSE](LICENSE).
