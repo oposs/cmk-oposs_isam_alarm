@@ -123,3 +123,17 @@ def test_service_name_and_section(check):
 def test_no_metrics(check, section):
     for item in section:
         assert all(isinstance(r, Result) for r in check.check_alarms(item, section))
+
+
+@pytest.mark.xfail(strict=True, reason="BUG: one line that is not a complete alarm object crashes the parse "
+                                       "function, so every ISAM Alarm State service of the host crashes")
+@pytest.mark.parametrize("bad", [
+    "<html><body>Bad Gateway</body></html>",
+    '{"info":"No active alarms","service":"Equip[1]/shub-l',
+    '{"info":"No active alarms","service":"Equip[1]/shub-loc[8]","status":4}',
+    '{"service":"Equip[1]/shub-loc[8]","status":0}',
+])
+def test_bad_line_does_not_take_the_other_alarms_down(check, bad):
+    section = check.parse_info([[COLLECTOR_LINES[1]], [bad]])
+    (result,) = check.check_alarms(ACTIVE, section)
+    assert result.state == State.CRIT
