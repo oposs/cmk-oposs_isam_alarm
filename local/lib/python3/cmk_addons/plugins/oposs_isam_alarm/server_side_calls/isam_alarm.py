@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # Copyright (C) 2025 OETIKER+PARTNER AG - License: GNU General Public License v2
 
 """
@@ -7,12 +6,13 @@ Converts GUI ruleset parameters into command-line arguments.
 """
 
 from collections.abc import Iterator
-from pydantic import BaseModel
+
 from cmk.server_side_calls.v1 import (
     HostConfig,
     SpecialAgentCommand,
     SpecialAgentConfig,
 )
+from pydantic import BaseModel
 
 
 class Params(BaseModel):
@@ -25,7 +25,7 @@ def commands_function(
 ) -> Iterator[SpecialAgentCommand]:
     ip = host_config.primary_ip_config.address or host_config.name
     yield SpecialAgentCommand(command_arguments=[
-        "%s/%s" % (params.collector, ip),
+        f"{params.collector}/{ip}",
     ])
 
 

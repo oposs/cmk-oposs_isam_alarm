@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # Copyright (C) 2025 OETIKER+PARTNER AG - License: GNU General Public License v2
 
 """
@@ -18,6 +17,10 @@ from cmk.agent_based.v2 import (
     Service,
     State,
 )
+
+# Create release PR writes the released version here (version_files in
+# .github/repo-infra.json)
+__version__ = "0.1.0"
 
 STATE_MAP = {
     0: State.OK,
