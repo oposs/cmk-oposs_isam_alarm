@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   text, which contradicted them.
 
 ### Fixed
+- One unreadable line from the alarm collector no longer crashes every
+  "ISAM Alarm State" service of the host; that line is skipped. An alarm
+  with a status other than 0 to 3 shows UNKNOWN with "Collector sent
+  unknown alarm status".
 
 ## 0.1.0 - 2026-03-04
 ### New

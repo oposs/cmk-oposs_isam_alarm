@@ -124,8 +124,6 @@ def test_no_metrics(check, section):
         assert all(isinstance(r, Result) for r in check.check_alarms(item, section))
 
 
-@pytest.mark.xfail(strict=True, reason="BUG: one line that is not a complete alarm object crashes the parse "
-                                       "function, so every ISAM Alarm State service of the host crashes")
 @pytest.mark.parametrize("bad", [
     "<html><body>Bad Gateway</body></html>",
     '{"info":"No active alarms","service":"Equip[1]/shub-l',
@@ -136,6 +134,27 @@ def test_bad_line_does_not_take_the_other_alarms_down(check, bad):
     section = check.parse_info([[COLLECTOR_LINES[1]], [bad]])
     (result,) = check.check_alarms(ACTIVE, section)
     assert result.state == State.CRIT
+
+
+@pytest.mark.parametrize("bad", [
+    "<html><body>Bad Gateway</body></html>",
+    '{"info":"No active alarms","service":"Equip[1]/shub-l',
+    '{"service":"Equip[1]/shub-loc[8]","status":0}',
+    '{"info":"","service":"Equip[1]/shub-loc[8]","status":0}',
+    '{"info":"No active alarms","status":0}',
+    '["Equip[1]/shub-loc[8]",0]',
+])
+def test_unreadable_line_is_skipped(check, bad):
+    assert check.parse_info([[bad]]) == {}
+
+
+@pytest.mark.parametrize("status", [4, -1, "2", None, True])
+def test_unknown_status_is_unknown(check, status):
+    line = json.dumps({"info": "No active alarms", "service": QUIET, "status": status})
+    (result,) = check.check_alarms(QUIET, check.parse_info([[line]]))
+    assert result.state == State.UNKNOWN
+    assert result.summary == f"Collector sent unknown alarm status {status!r}"
+    assert result.details == "No active alarms"
 
 
 def test_check_carries_the_released_version():
