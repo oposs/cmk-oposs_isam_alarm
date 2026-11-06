@@ -13,6 +13,7 @@ to the parse function as a one-element list.
 import importlib.util
 import json
 import pathlib
+import re
 import sys
 
 import pytest
@@ -135,3 +136,27 @@ def test_bad_line_does_not_take_the_other_alarms_down(check, bad):
     section = check.parse_info([[COLLECTOR_LINES[1]], [bad]])
     (result,) = check.check_alarms(ACTIVE, section)
     assert result.state == State.CRIT
+
+
+def test_check_carries_the_released_version():
+    # The publish check fails on main when a version file disagrees with
+    # the newest released CHANGES.md heading.
+    released = re.search(r"^## (\d+\.\d+\.\d+)", (ROOT / "CHANGES.md").read_text(),
+                         flags=re.MULTILINE).group(1)
+    assert re.search(rf'^__version__ = "{re.escape(released)}"$', CHECK.read_text(), flags=re.MULTILINE)
+
+
+def test_release_writes_version_into_check(tmp_path):
+    """Apply the version_files entry of .github/repo-infra.json to the check
+    module, as Create release PR does (a multiline regex, first match)"""
+    config = json.loads((ROOT / ".github/repo-infra.json").read_text())
+    (spec,) = [f for f in config["version_files"] if (ROOT / f["path"]) == CHECK]
+    stamped = re.sub(spec["pattern"], spec["replacement"].replace("$VERSION", "9.8.7"),
+                     CHECK.read_text(), count=1, flags=re.MULTILINE)
+    assert re.search(spec["verify"].replace("$VERSION", re.escape("9.8.7")), stamped, flags=re.MULTILINE)
+    copy = tmp_path / "stamped_check.py"
+    copy.write_text(stamped)
+    module_spec = importlib.util.spec_from_file_location("stamped_check", copy)
+    module = importlib.util.module_from_spec(module_spec)
+    module_spec.loader.exec_module(module)
+    assert module.__version__ == "9.8.7"
