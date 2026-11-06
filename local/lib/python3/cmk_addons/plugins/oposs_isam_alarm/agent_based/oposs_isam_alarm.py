@@ -34,11 +34,29 @@ def parse_info(string_table):
     """Parse JSON lines into a dict mapping service name -> Result."""
     parsed = {}
     for line in string_table:
-        j = json.loads(line[0])
-        s = j["service"]
+        # A line that is not a complete alarm object is skipped, so it
+        # cannot take the other alarms of the host down with it
+        try:
+            j = json.loads(line[0])
+        except (IndexError, ValueError):
+            continue
+        if not isinstance(j, dict):
+            continue
+        s = j.get("service")
+        info = j.get("info")
+        if not isinstance(s, str) or not s or not isinstance(info, str) or not info:
+            continue
+        status = j.get("status")
+        if isinstance(status, bool) or not isinstance(status, int) or status not in STATE_MAP:
+            parsed[s] = Result(
+                state=State.UNKNOWN,
+                summary=f"Collector sent unknown alarm status {status!r}",
+                details=info,
+            )
+            continue
         parsed[s] = Result(
-            state=STATE_MAP[j["status"]],
-            notice=j["info"],
+            state=STATE_MAP[status],
+            notice=info,
         )
     return parsed
 
