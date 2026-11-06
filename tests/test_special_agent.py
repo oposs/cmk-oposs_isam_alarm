@@ -14,7 +14,6 @@ from importlib.machinery import SourceFileLoader
 
 import pytest
 import requests
-
 from cmk.server_side_calls.v1 import HostConfig, IPv4Config, SpecialAgentCommand
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent

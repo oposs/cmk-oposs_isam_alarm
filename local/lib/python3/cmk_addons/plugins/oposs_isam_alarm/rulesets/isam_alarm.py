@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # Copyright (C) 2025 OETIKER+PARTNER AG - License: GNU General Public License v2
 
 """
@@ -6,7 +5,7 @@ Ruleset configuration for ISAM alarm special agent.
 Provides GUI configuration form for the collector URL.
 """
 
-from cmk.rulesets.v1 import Title, Help
+from cmk.rulesets.v1 import Help, Title
 from cmk.rulesets.v1.form_specs import (
     DictElement,
     Dictionary,

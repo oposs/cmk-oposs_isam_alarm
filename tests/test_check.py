@@ -13,11 +13,9 @@ to the parse function as a one-element list.
 import importlib.util
 import json
 import pathlib
-import re
 import sys
 
 import pytest
-
 from cmk.agent_based.v2 import Result, Service, State
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
