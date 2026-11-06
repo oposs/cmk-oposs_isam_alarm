@@ -148,7 +148,7 @@ def test_unreadable_line_is_skipped(check, bad):
     assert check.parse_info([[bad]]) == {}
 
 
-@pytest.mark.parametrize("status", [4, -1, "2", None, True])
+@pytest.mark.parametrize("status", [4, -1, "2", None, True, [1], {}])
 def test_unknown_status_is_unknown(check, status):
     line = json.dumps({"info": "No active alarms", "service": QUIET, "status": status})
     (result,) = check.check_alarms(QUIET, check.parse_info([[line]]))

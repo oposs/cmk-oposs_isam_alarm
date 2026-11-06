@@ -47,7 +47,7 @@ def parse_info(string_table):
         if not isinstance(s, str) or not s or not isinstance(info, str) or not info:
             continue
         status = j.get("status")
-        if status not in STATE_MAP or isinstance(status, bool):
+        if isinstance(status, bool) or not isinstance(status, int) or status not in STATE_MAP:
             parsed[s] = Result(
                 state=State.UNKNOWN,
                 summary=f"Collector sent unknown alarm status {status!r}",
