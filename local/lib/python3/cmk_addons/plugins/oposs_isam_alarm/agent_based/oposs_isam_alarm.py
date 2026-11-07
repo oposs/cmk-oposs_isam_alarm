@@ -20,7 +20,7 @@ from cmk.agent_based.v2 import (
 
 # Create release PR writes the released version here (version_files in
 # .github/repo-infra.json)
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 STATE_MAP = {
     0: State.OK,
