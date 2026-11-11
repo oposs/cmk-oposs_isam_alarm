@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   version too (`__version__`).
 
 ### Changed
+- An "ISAM Alarm State" service in state OK shows the collector's text,
+  usually "No active alarms", as its summary instead of an empty line.
 
 ### Fixed
 

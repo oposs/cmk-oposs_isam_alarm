@@ -81,8 +81,9 @@ def test_discovery_of_empty_section(check):
 def test_quiet_alarm_is_ok(check, section):
     (result,) = check.check_alarms(QUIET, section)
     assert result.state == State.OK
-    # OK keeps the summary empty and shows the text in the details only
-    assert result.summary == ""
+    # The collector's text is the summary, so the service does not show
+    # an empty line when everything is OK
+    assert result.summary == "No active alarms"
     assert result.details == "No active alarms"
 
 
@@ -104,7 +105,7 @@ def test_active_alarm_is_crit_with_full_info(check, section):
 def test_status_maps_to_state(check, status, state):
     line = json.dumps({"info": "something", "service": "Equip[1]/shub-loc[8]", "status": status})
     (result,) = check.check_alarms("Equip[1]/shub-loc[8]", check.parse_info([[line]]))
-    assert result == Result(state=state, notice="something")
+    assert result == Result(state=state, summary="something")
 
 
 def test_vanished_item_yields_nothing(check, section):
