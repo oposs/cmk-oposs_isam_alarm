@@ -8,7 +8,7 @@ Migrated from oegig-plugins to Checkmk 2.3.x v2 API.
 - `local/lib/python3/cmk_addons/plugins/oposs_isam_alarm/agent_based/oposs_isam_alarm.py` -- check plugin (parse JSON, discover services, check alarm state)
 - `local/lib/python3/cmk_addons/plugins/oposs_isam_alarm/libexec/agent_oposs_isam_alarm` -- special agent script (HTTP GET from collector)
 - `local/lib/python3/cmk_addons/plugins/oposs_isam_alarm/server_side_calls/isam_alarm.py` -- server-side call connector (builds URL)
-- `local/lib/python3/cmk_addons/plugins/oposs_isam_alarm/rulesets/isam_alarm.py` -- WATO ruleset (collector URL field)
+- `local/lib/python3/cmk_addons/plugins/oposs_isam_alarm/rulesets/isam_alarm.py` -- WATO ruleset (collector URL, optional TLS verification switch; off adds `--no-verify-tls` before the URL)
 - `.mkp-builder.ini` -- MKP packaging config
 - `.github/workflows/` -- repo-infra callers: `ci.yml` (ruff, pytest, MKP build), `changelog.yml`, `release-pr.yml`, `release-build.yml`, `release-publish.yml`; settings in `.github/repo-infra.json`
 - `tests/` -- pytest against the real Checkmk 2.3.0 API (`tests/conftest.py` fetches it into `.cmk-api/`); run `pytest -q` and `ruff check .`

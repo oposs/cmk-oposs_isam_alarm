@@ -10,14 +10,25 @@ import sys
 import requests
 from cmk.utils.password_store import replace_passwords
 
+# Create release PR writes the released version here (version_files in
+# .github/repo-infra.json)
+__version__ = "0.2.0"
+
 
 def main(argv=None):
     replace_passwords()
-    args = argv or sys.argv[1:]
+    args = list(sys.argv[1:] if argv is None else argv)
+    options = {}
+    if args[:1] == ["--no-verify-tls"]:
+        args.pop(0)
+        options["verify"] = False
+        # The user chose this; a warning per call would only fill the log
+        requests.packages.urllib3.disable_warnings(
+            requests.packages.urllib3.exceptions.InsecureRequestWarning)
     if len(args) != 1:
-        sys.stderr.write("Usage: agent_oposs_isam_alarm URL\n")
+        sys.stderr.write("Usage: agent_oposs_isam_alarm [--no-verify-tls] URL\n")
         return 1
-    response = requests.get(args[0], timeout=30)
+    response = requests.get(args[0], timeout=30, **options)
     response.raise_for_status()
     sys.stdout.write(response.text)
     return 0

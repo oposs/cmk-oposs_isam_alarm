@@ -50,6 +50,9 @@ local/lib/python3/cmk_addons/plugins/oposs_isam_alarm/
 1. In WATO, navigate to **Setup > Agents > Other integrations > OPOSS ISAM Alarm Collector**
 2. Set the **Collector URL** (e.g., `https://collector.example.com:8443/isam`)
 3. The agent builds the final URL as `{collector_url}/{host_ip}`
+4. Optional: turn off **Verify the TLS certificate of the collector** for a
+   collector with a self-signed certificate. Without this option the
+   certificate is verified.
 
 ## Related Projects
 

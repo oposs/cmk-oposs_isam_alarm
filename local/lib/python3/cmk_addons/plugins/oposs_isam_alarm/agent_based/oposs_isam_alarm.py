@@ -54,9 +54,12 @@ def parse_info(string_table):
                 details=info,
             )
             continue
+        # The summary is shown for every state, OK included; the full
+        # multi-line text stays in the details
         parsed[s] = Result(
             state=STATE_MAP[status],
-            notice=info,
+            summary=info.replace("\n", ", "),
+            details=info,
         )
     return parsed
 
