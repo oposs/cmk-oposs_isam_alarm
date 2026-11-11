@@ -5,8 +5,10 @@ Ruleset configuration for ISAM alarm special agent.
 Provides GUI configuration form for the collector URL.
 """
 
-from cmk.rulesets.v1 import Help, Title
+from cmk.rulesets.v1 import Help, Label, Title
 from cmk.rulesets.v1.form_specs import (
+    BooleanChoice,
+    DefaultValue,
     DictElement,
     Dictionary,
     String,
@@ -29,6 +31,16 @@ def _formspec():
                     custom_validate=[validators.LengthInRange(min_value=1)],
                 ),
                 required=True,
+            ),
+            "verify_tls": DictElement(
+                parameter_form=BooleanChoice(
+                    title=Title("Verify the TLS certificate of the collector"),
+                    help_text=Help("Turn this off only for a collector with a self-signed "
+                                   "certificate. Without this option the certificate is verified."),
+                    label=Label("Verify the certificate"),
+                    prefill=DefaultValue(True),
+                ),
+                required=False,
             ),
         },
     )

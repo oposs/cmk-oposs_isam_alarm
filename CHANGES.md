@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### New
+- The rule "OPOSS ISAM Alarm Collector" has the option "Verify the TLS
+  certificate of the collector". Turn it off for a collector with a
+  self-signed certificate; without the option the certificate is verified
+  as before.
 - The special agent `agent_oposs_isam_alarm` carries the release
   version too (`__version__`).
 

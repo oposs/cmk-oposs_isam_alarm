@@ -77,6 +77,19 @@ def test_agent_passes_the_collector_answer_through(agent, monkeypatch, capsys):
     assert agent.calls == ["replace_passwords"]
 
 
+def test_agent_can_skip_tls_verification(agent, monkeypatch, capsys):
+    seen = {}
+
+    def get(url, **kwargs):
+        seen.update(url=url, **kwargs)
+        return _Response(BODY)
+
+    monkeypatch.setattr(agent.requests, "get", get)
+    assert agent.main(["--no-verify-tls", "https://collector.example.com:8443/isam/10.1.2.3"]) == 0
+    assert capsys.readouterr().out == BODY
+    assert seen == {"url": "https://collector.example.com:8443/isam/10.1.2.3", "timeout": 30, "verify": False}
+
+
 def test_agent_fails_on_http_error(agent, monkeypatch, capsys):
     # The collector answers 404 "Not Found" for a path without an address
     monkeypatch.setattr(agent.requests, "get", lambda url, **kw: _Response("Not Found", 404))
@@ -85,12 +98,12 @@ def test_agent_fails_on_http_error(agent, monkeypatch, capsys):
     assert capsys.readouterr().out == ""
 
 
-@pytest.mark.parametrize("args", [[], ["a", "b"]])
+@pytest.mark.parametrize("args", [[], ["a", "b"], ["--no-verify-tls"]])
 def test_agent_usage(agent, monkeypatch, capsys, args):
     monkeypatch.setattr(sys, "argv", ["agent_oposs_isam_alarm", *args])
     monkeypatch.setattr(agent.requests, "get", lambda *a, **k: pytest.fail("must not fetch"))
     assert agent.main() == 1
-    assert "Usage: agent_oposs_isam_alarm URL" in capsys.readouterr().err
+    assert "Usage: agent_oposs_isam_alarm [--no-verify-tls] URL" in capsys.readouterr().err
 
 
 def test_agent_empty_argv_is_not_replaced_by_sys_argv(agent, monkeypatch, capsys):
@@ -99,7 +112,7 @@ def test_agent_empty_argv_is_not_replaced_by_sys_argv(agent, monkeypatch, capsys
     monkeypatch.setattr(sys, "argv", ["agent_oposs_isam_alarm", "https://collector.example.com:8443/isam/10.1.2.3"])
     monkeypatch.setattr(agent.requests, "get", lambda *a, **k: pytest.fail("must not fetch"))
     assert agent.main([]) == 1
-    assert "Usage: agent_oposs_isam_alarm URL" in capsys.readouterr().err
+    assert "Usage: agent_oposs_isam_alarm [--no-verify-tls] URL" in capsys.readouterr().err
 
 
 def test_agent_is_executable_in_git():
@@ -135,6 +148,15 @@ def test_failed_address_lookup_is_not_replaced_by_the_host_name(ssc):
                                                 _host(None)))
 
 
+@pytest.mark.parametrize("verify_tls", [True, False])
+def test_command_turns_tls_verification_off_only_on_request(ssc, verify_tls):
+    params = {"collector": "https://collector.example.com:8443/isam", "verify_tls": verify_tls}
+    (command,) = ssc.special_agent_oposs_isam_alarm(params, _host("10.1.2.3"))
+    flags = [] if verify_tls else ["--no-verify-tls"]
+    assert command == SpecialAgentCommand(
+        command_arguments=[*flags, "https://collector.example.com:8443/isam/10.1.2.3"])
+
+
 def test_parameter_parser_needs_a_collector(ssc):
     with pytest.raises(ValueError):
         list(ssc.special_agent_oposs_isam_alarm({}, _host("10.1.2.3")))
@@ -152,7 +174,7 @@ def test_rule_form_has_a_required_collector_url():
 
     rulesets = _load(PLUGIN / "rulesets/isam_alarm.py", "test_oposs_isam_alarm_rulesets")
     form = rulesets.rule_spec_special_agent_oposs_isam_alarm.parameter_form()
-    assert set(form.elements) == {"collector"}
+    assert set(form.elements) == {"collector", "verify_tls"}
     element = form.elements["collector"]
     assert element.required
     assert isinstance(element.parameter_form, String)
@@ -185,3 +207,14 @@ def test_release_writes_version_into_agent(tmp_path, monkeypatch):
     module = importlib.util.module_from_spec(importlib.util.spec_from_loader(loader.name, loader))
     loader.exec_module(module)
     assert module.__version__ == "9.8.7"
+
+
+def test_rule_form_verifies_tls_unless_told_otherwise():
+    # Optional, so a rule saved before the option existed keeps verifying
+    from cmk.rulesets.v1.form_specs import BooleanChoice, DefaultValue
+
+    rulesets = _load(PLUGIN / "rulesets/isam_alarm.py", "test_oposs_isam_alarm_rulesets")
+    element = rulesets.rule_spec_special_agent_oposs_isam_alarm.parameter_form().elements["verify_tls"]
+    assert not element.required
+    assert isinstance(element.parameter_form, BooleanChoice)
+    assert element.parameter_form.prefill == DefaultValue(True)

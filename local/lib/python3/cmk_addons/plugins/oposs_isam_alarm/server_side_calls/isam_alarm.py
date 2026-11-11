@@ -17,6 +17,7 @@ from pydantic import BaseModel
 
 class Params(BaseModel):
     collector: str
+    verify_tls: bool = True
 
 
 def commands_function(
@@ -24,7 +25,10 @@ def commands_function(
     host_config: HostConfig,
 ) -> Iterator[SpecialAgentCommand]:
     ip = host_config.primary_ip_config.address
+    # Without the option the command line stays as it always was
+    flags = [] if params.verify_tls else ["--no-verify-tls"]
     yield SpecialAgentCommand(command_arguments=[
+        *flags,
         f"{params.collector}/{ip}",
     ])
 
