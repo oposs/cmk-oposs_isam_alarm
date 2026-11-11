@@ -6,7 +6,9 @@ libexec/agent_oposs_isam_alarm (the script Checkmk runs).
 """
 
 import importlib.util
+import json
 import pathlib
+import re
 import subprocess
 import sys
 import types
@@ -146,3 +148,31 @@ def test_rule_form_has_a_required_collector_url():
     assert element.required
     assert isinstance(element.parameter_form, String)
     assert any(isinstance(v, validators.LengthInRange) for v in element.parameter_form.custom_validate)
+
+
+def test_agent_carries_the_released_version():
+    # The publish check fails on main when a version file disagrees with
+    # the newest released CHANGES.md heading.
+    released = re.search(r"^## (\d+\.\d+\.\d+)", (ROOT / "CHANGES.md").read_text(),
+                         flags=re.MULTILINE).group(1)
+    assert re.search(rf'^__version__ = "{re.escape(released)}"$', AGENT.read_text(), flags=re.MULTILINE)
+
+
+def test_release_writes_version_into_agent(tmp_path, monkeypatch):
+    """Apply the version_files entry of .github/repo-infra.json to the special
+    agent, as Create release PR does (a multiline regex, first match)"""
+    config = json.loads((ROOT / ".github/repo-infra.json").read_text())
+    (spec,) = [f for f in config["version_files"] if (ROOT / f["path"]) == AGENT]
+    stamped = re.sub(spec["pattern"], spec["replacement"].replace("$VERSION", "9.8.7"),
+                     AGENT.read_text(), count=1, flags=re.MULTILINE)
+    assert re.search(spec["verify"].replace("$VERSION", re.escape("9.8.7")), stamped, flags=re.MULTILINE)
+    copy = tmp_path / "agent_oposs_isam_alarm"
+    copy.write_text(stamped)
+    monkeypatch.setitem(sys.modules, "cmk.utils", types.ModuleType("cmk.utils"))
+    password_store = types.ModuleType("cmk.utils.password_store")
+    password_store.replace_passwords = lambda: None
+    monkeypatch.setitem(sys.modules, "cmk.utils.password_store", password_store)
+    loader = SourceFileLoader("stamped_agent", str(copy))
+    module = importlib.util.module_from_spec(importlib.util.spec_from_loader(loader.name, loader))
+    loader.exec_module(module)
+    assert module.__version__ == "9.8.7"

@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### New
+- The special agent `agent_oposs_isam_alarm` carries the release
+  version too (`__version__`).
 
 ### Changed
 
