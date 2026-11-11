@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### New
+
+### Changed
+
+### Fixed
+
+## 0.3.0 - 2026-11-11
+### New
 - The rule "OPOSS ISAM Alarm Collector" has the option "Verify the TLS
   certificate of the collector". Turn it off for a collector with a
   self-signed certificate; without the option the certificate is verified
@@ -18,8 +25,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ### Changed
 - An "ISAM Alarm State" service in state OK shows the collector's text,
   usually "No active alarms", as its summary instead of an empty line.
-
-### Fixed
 
 ## 0.2.0 - 2026-11-07
 ### New
