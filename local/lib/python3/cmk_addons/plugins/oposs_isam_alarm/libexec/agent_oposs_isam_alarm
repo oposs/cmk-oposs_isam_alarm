@@ -13,7 +13,7 @@ from cmk.utils.password_store import replace_passwords
 
 def main(argv=None):
     replace_passwords()
-    args = argv or sys.argv[1:]
+    args = sys.argv[1:] if argv is None else argv
     if len(args) != 1:
         sys.stderr.write("Usage: agent_oposs_isam_alarm URL\n")
         return 1

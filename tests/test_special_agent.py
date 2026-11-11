@@ -91,6 +91,15 @@ def test_agent_usage(agent, monkeypatch, capsys, args):
     assert "Usage: agent_oposs_isam_alarm URL" in capsys.readouterr().err
 
 
+def test_agent_empty_argv_is_not_replaced_by_sys_argv(agent, monkeypatch, capsys):
+    # An explicit empty argument list is a usage error, even when the
+    # process itself was started with a URL
+    monkeypatch.setattr(sys, "argv", ["agent_oposs_isam_alarm", "https://collector.example.com:8443/isam/10.1.2.3"])
+    monkeypatch.setattr(agent.requests, "get", lambda *a, **k: pytest.fail("must not fetch"))
+    assert agent.main([]) == 1
+    assert "Usage: agent_oposs_isam_alarm URL" in capsys.readouterr().err
+
+
 def test_agent_is_executable_in_git():
     # Checkmk runs the special agent as a program
     mode = subprocess.run(["git", "-C", str(ROOT), "ls-files", "-s", str(AGENT.relative_to(ROOT))],
