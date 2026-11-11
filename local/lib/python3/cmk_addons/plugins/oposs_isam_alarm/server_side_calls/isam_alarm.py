@@ -23,7 +23,7 @@ def commands_function(
     params: Params,
     host_config: HostConfig,
 ) -> Iterator[SpecialAgentCommand]:
-    ip = host_config.primary_ip_config.address or host_config.name
+    ip = host_config.primary_ip_config.address
     yield SpecialAgentCommand(command_arguments=[
         f"{params.collector}/{ip}",
     ])

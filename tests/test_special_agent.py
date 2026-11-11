@@ -126,6 +126,15 @@ def test_command_appends_the_host_address(ssc):
     ]
 
 
+def test_failed_address_lookup_is_not_replaced_by_the_host_name(ssc):
+    # Checkmk raises for a host whose address lookup failed and reports
+    # that during config generation; the agent never asks the collector
+    # for the host name instead
+    with pytest.raises(RuntimeError):
+        list(ssc.special_agent_oposs_isam_alarm({"collector": "https://collector.example.com:8443/isam"},
+                                                _host(None)))
+
+
 def test_parameter_parser_needs_a_collector(ssc):
     with pytest.raises(ValueError):
         list(ssc.special_agent_oposs_isam_alarm({}, _host("10.1.2.3")))
